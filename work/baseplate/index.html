@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BasePlate, a LEGO resale decision tool — Pahul Sachdev</title>
+<meta name="description" content="BasePlate values a LEGO set in every condition and returns a BUY or PASS verdict with the net after each platform's fees.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../../index.html">Pahul Sachdev<span>.</span></a>
+    <nav class="topnav" aria-label="Main"><a href="../../index.html#work" aria-current="page">Work</a><a href="../../index.html#about" class="hide-sm">About</a><a href="../../index.html#contact">Contact</a></nav>
+  </div>
+</header>
+
+<main class="wrap narrow">
+  <section class="cs-hero">
+    <a class="back" href="../../index.html#work">← All work</a>
+    <p class="kicker">Personal project · Summer 2026</p>
+    <h1>BasePlate, a LEGO resale valuation tool</h1>
+    <p class="lede">A tool I built for my LEGO reselling. Give it a set, a buy price and a condition, and it values the set in every condition, compares the net after each platform's fees, and returns BUY or PASS with the reasoning written out.</p>
+    <div class="facts">
+      <div class="fact"><b>5 conditions</b><span>sealed to incomplete, valued at once</span></div>
+      <div class="fact"><b>5 platforms</b><span>net after each one's real fees</span></div>
+      <div class="fact"><b>583 tests</b><span>across 156 suites, all passing</span></div>
+    </div>
+  </section>
+
+  <article class="cs">
+
+    <h2>What it does</h2>
+    <ul>
+      <li><b>Valuation.</b> Market value for a set in every condition at once: sealed, open box, used with box, used without box, and incomplete. Plus its 12-month trend and a graded forecast.</li>
+      <li><b>BUY / PASS verdict.</b> Given a buy price and condition, it picks the best play (flip it sealed, resell it used, or part it out), works out the net after fees, and only says BUY if the margin clears the threshold, 25% by default. Every verdict comes with its reasoning.</li>
+      <li><b>Net after fees, per platform.</b> eBay, Mercari, Facebook (local and shipped) and BrickLink, each with its published fee formula, side by side.</li>
+      <li><b>Retiring board.</b> Sets about to leave production, the window resellers watch most closely. Most retirement dates are only known to the month, and it labels them that way.</li>
+      <li><b>Minifigures.</b> Per-figure values, plus a flag for sets where the figures carry most of the value.</li>
+    </ul>
+
+    <figure>
+      <div class="frame">
+        <svg class="dg" viewBox="0 0 760 270" role="img" aria-labelledby="v-t">
+          <title id="v-t">A set, buy price and condition go into the valuation, which compares plays and platforms after fees, and returns BUY only if the margin clears the threshold</title>
+          <defs><marker id="va" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ar" d="M0 0 L10 5 L0 10z"/></marker></defs>
+          <rect class="box" x="10" y="95" width="140" height="80" rx="10"/><text class="t" x="80" y="122" text-anchor="middle">Set number</text><text class="s" x="80" y="142" text-anchor="middle">+ buy price</text><text class="s" x="80" y="159" text-anchor="middle">+ condition</text>
+          <rect class="box b" x="190" y="30" width="200" height="58" rx="10"/><text class="t" x="290" y="55" text-anchor="middle">Value by condition</text><text class="s" x="290" y="73" text-anchor="middle">sealed → incomplete</text>
+          <rect class="box b" x="190" y="106" width="200" height="58" rx="10"/><text class="t" x="290" y="131" text-anchor="middle">Possible plays</text><text class="s" x="290" y="149" text-anchor="middle">flip sealed · resell used · part out</text>
+          <rect class="box b" x="190" y="182" width="200" height="58" rx="10"/><text class="t" x="290" y="207" text-anchor="middle">Fees per platform</text><text class="s" x="290" y="225" text-anchor="middle">eBay · Mercari · FB · BrickLink</text>
+          <rect class="box" x="430" y="95" width="150" height="80" rx="10"/><text class="t" x="505" y="125" text-anchor="middle">Best net</text><text class="s" x="505" y="145" text-anchor="middle">margin vs. 25%</text>
+          <rect class="box g" x="620" y="62" width="130" height="58" rx="10"/><text class="t" x="685" y="88" text-anchor="middle">BUY</text><text class="s" x="685" y="106" text-anchor="middle">+ reasoning</text>
+          <rect class="box r" x="620" y="150" width="130" height="58" rx="10"/><text class="t" x="685" y="176" text-anchor="middle">PASS</text><text class="s" x="685" y="194" text-anchor="middle">+ reasoning</text>
+          <path class="ln" marker-end="url(#va)" d="M150 125 C170 125 170 59 188 59"/><path class="ln" marker-end="url(#va)" d="M150 135 H188"/><path class="ln" marker-end="url(#va)" d="M150 145 C170 145 170 211 188 211"/>
+          <path class="ln" marker-end="url(#va)" d="M390 59 C410 59 410 120 428 120"/><path class="ln" marker-end="url(#va)" d="M390 135 H428"/><path class="ln" marker-end="url(#va)" d="M390 211 C410 211 410 150 428 150"/>
+          <path class="ln" marker-end="url(#va)" d="M580 125 C600 125 600 91 618 91"/><path class="ln" marker-end="url(#va)" d="M580 145 C600 145 600 179 618 179"/>
+        </svg>
+      </div>
+      <figcaption>How a verdict is made. The verdict is tied to one platform per play, with the others shown alongside for comparison.</figcaption>
+    </figure>
+
+    <h2>Two rules I built it around</h2>
+    <h3>Honesty over completeness</h3>
+    <p>This tool informs real money decisions, so it never shows a made-up, estimated or stale number as if it were real. Missing data says "not valued yet," never $0.00. Estimates are flagged, stale values get a banner, and anything from mock data is labelled MOCK. A blank is better than a confident guess.</p>
+    <h3>Don't burn the API budget</h3>
+    <p>The main pricing source allows 100 requests a day. One page of search results could burn that if every view fetched prices. So browsing, sorting and filtering only read from a local cache, and only an explicit "Value this set" or "Refresh" click spends a request. Every outbound call is logged and shown in a quota meter, and the test suite checks that reading the cache never touches the network.</p>
+
+    <h2>How it's built</h2>
+    <p>The core is pure logic with no network or database code in it. It defines interfaces for everything it needs (prices, part-out values, the set catalog, storage, the clock), and one wiring file decides what backs each one, real or mock. That's the ports-and-adapters pattern. It's why the engine runs the same from the web app or the command line, and why swapping a data source doesn't touch the valuation logic.</p>
+
+    <figure>
+      <div class="frame">
+        <svg class="dg" viewBox="0 0 760 300" role="img" aria-labelledby="pa-t">
+          <title id="pa-t">Ports and adapters: the web app and CLI call the wiring, which injects adapters for BrickEconomy, Brickset, Rebrickable, a mock part-out source and a SQLite cache into a pure valuation core</title>
+          <defs><marker id="pb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ar" d="M0 0 L10 5 L0 10z"/></marker></defs>
+          <rect class="box" x="10" y="60" width="150" height="56" rx="10"/><text class="t" x="85" y="84" text-anchor="middle">Web app</text><text class="s" x="85" y="102" text-anchor="middle">Next.js</text>
+          <rect class="box" x="10" y="160" width="150" height="56" rx="10"/><text class="t" x="85" y="184" text-anchor="middle">Command line</text><text class="s" x="85" y="202" text-anchor="middle">pnpm valuate</text>
+          <rect class="box" x="200" y="110" width="120" height="56" rx="10"/><text class="t" x="260" y="134" text-anchor="middle">Wiring</text><text class="s" x="260" y="152" text-anchor="middle">real or mock</text>
+          <rect class="zone" x="350" y="40" width="170" height="196" rx="14"/><text class="k" x="435" y="32" text-anchor="middle">PURE CORE</text>
+          <rect class="box g" x="366" y="58" width="138" height="72" rx="10"/><text class="t" x="435" y="86" text-anchor="middle">Valuation</text><text class="s" x="435" y="104" text-anchor="middle">verdict · plays</text>
+          <rect class="box g" x="366" y="146" width="138" height="72" rx="10"/><text class="t" x="435" y="174" text-anchor="middle">Interfaces</text><text class="s" x="435" y="192" text-anchor="middle">+ fee config</text>
+          <rect class="box b" x="560" y="20" width="190" height="42" rx="8"/><text class="t" x="655" y="46" text-anchor="middle">BrickEconomy · values</text>
+          <rect class="box b" x="560" y="72" width="190" height="42" rx="8"/><text class="t" x="655" y="98" text-anchor="middle">Brickset · retirement</text>
+          <rect class="box b" x="560" y="124" width="190" height="42" rx="8"/><text class="t" x="655" y="150" text-anchor="middle">Rebrickable · search</text>
+          <rect class="box a" x="560" y="176" width="190" height="42" rx="8"/><text class="t" x="655" y="202" text-anchor="middle">Part-out · MOCK</text>
+          <rect class="box" x="560" y="228" width="190" height="42" rx="8"/><text class="t" x="655" y="254" text-anchor="middle">SQLite cache · API log</text>
+          <path class="ln" marker-end="url(#pb)" d="M160 88 C180 88 180 130 198 130"/><path class="ln" marker-end="url(#pb)" d="M160 188 C180 188 180 146 198 146"/>
+          <path class="ln" marker-end="url(#pb)" d="M320 138 H348"/>
+          <path class="ln d" d="M558 41 C535 41 535 182 520 182"/><path class="ln d" d="M558 93 H540"/><path class="ln d" d="M558 145 H540"/><path class="ln d" d="M558 197 H540"/><path class="ln d" d="M558 249 C535 249 535 200 520 200"/>
+        </svg>
+      </div>
+      <figcaption>Adapters (right) plug into the core's interfaces. Fees are config, not code: adding a platform is one row in a file.</figcaption>
+    </figure>
+
+    <h2>Status</h2>
+    <p><b>Working:</b> valuation, verdicts, per-platform nets, set lookup, watchlist, trending, the retiring board, set detail pages and minifigure values.</p>
+    <p><b>Still mock:</b> part-out value. It needs BrickLink's price data, and BrickLink only opens its API to verified sellers. Until then it's labelled MOCK everywhere.</p>
+    <p><b>Next, when I pick it back up:</b> an inventory and profit dashboard, real part-out with an optimizer, and a sourcing tool for finding the cheapest parts to rebuild a set.</p>
+
+    <h2>Stack</h2>
+    <div class="tags"><span class="tag">TypeScript</span><span class="tag">Next.js 16</span><span class="tag">React 19</span><span class="tag">Tailwind CSS</span><span class="tag">Prisma</span><span class="tag">SQLite</span><span class="tag">Node test runner</span></div>
+
+    <nav class="next" aria-label="More work">
+      <a href="../jarvis/index.html"><span>Previous</span>← Jarvis</a>
+      <a href="../westinghouse/index.html"><span>Next</span>Westinghouse →</a>
+    </nav>
+  </article>
+</main>
+<footer class="wrap narrow">© 2026 Pahul Sachdev</footer>
+</body>
+</html>

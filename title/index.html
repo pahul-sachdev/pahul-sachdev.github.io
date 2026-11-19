@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Title walkthrough — Pahul Sachdev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a product walkthrough. Section rail on the left, a browser-frame stage you can click through in the middle, notes on what I built underneath. */
+:root {
+  --bg: #f3f4f1;
+  --surface: #ffffff;
+  --ink: #17191a;
+  --muted: #5d6460;
+  --line: #dde0db;
+  --accent: #1d6b47;
+  --accent-soft: #e3efe8;
+  --team: #8a5a12;
+  --team-soft: #f6ecd9;
+  --frame: #e7e9e5;
+  --font-display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121514; --surface: #1a1e1c; --ink: #eef1ee; --muted: #a2aaa5; --line: #2c322f;
+    --accent: #6fcf9c; --accent-soft: #1f3329; --team: #e6b866; --team-soft: #3a2f1c; --frame: #232826;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121514; --surface: #1a1e1c; --ink: #eef1ee; --muted: #a2aaa5; --line: #2c322f;
+  --accent: #6fcf9c; --accent-soft: #1f3329; --team: #e6b866; --team-soft: #3a2f1c; --frame: #232826;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--font-body); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.wrap { max-width: 1440px; margin: 0 auto; padding: 0 24px; }
+header.top { padding: 36px 0 22px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; border-bottom: 1px solid var(--line); }
+.kicker { font: 500 12px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+h1 { font: 700 clamp(28px, 4vw, 44px)/1.05 var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.lede { max-width: 68ch; color: var(--muted); margin: 12px 0 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; min-width: 120px; }
+.fact b { display: block; font: 700 22px/1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+.fact span { font-size: 12px; color: var(--muted); }
+
+.stage-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.stage-head h2 { font: 700 26px/1.15 var(--font-display); margin: 0; text-wrap: balance; }
+.badge { font: 500 12px/1 var(--font-body); padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
+.badge.me { background: var(--accent-soft); color: var(--accent); }
+.badge.team { background: var(--team-soft); color: var(--team); }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { cursor: pointer; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 12px; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+.btn:hover { border-color: var(--accent); }
+.btn[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn[disabled] { opacity: .45; cursor: default; }
+
+.browser { background: var(--frame); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px -18px rgba(0,0,0,.35); }
+.chrome { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+.dots { display: flex; gap: 6px; } .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); display: block; }
+.url { flex: 1; min-width: 0; background: var(--surface); border-radius: 6px; padding: 4px 10px; font: 12px/1.4 var(--font-mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.screen { position: relative; aspect-ratio: 16 / 10; background: var(--surface); overflow: hidden; }
+.screen.tall { overflow-y: auto; }
+.screen img { display: block; width: 100%; height: auto; }
+.screen video { display: block; width: 100%; height: 100%; object-fit: contain; background: #000; }
+.hot { position: absolute; border-radius: 6px; cursor: pointer; border: 2px solid transparent; background: transparent; padding: 0; }
+.hot:hover, .hot:focus-visible { border-color: var(--accent); background: rgba(29,107,71,.10); }
+.showhot .hot { border-color: #f5b301; background: rgba(245,179,1,.14); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { background: rgba(245,179,1,.28); } }
+@media (prefers-reduced-motion: reduce) { .showhot .hot { animation: none; } }
+.browser { position: relative; }
+
+.screen.narrow { background: var(--frame); }
+.screen.narrow img { width: 390px; max-width: 80%; margin: 24px auto; border-radius: 28px; border: 8px solid #17191a; box-shadow: 0 16px 40px -20px rgba(0,0,0,.6); }
+.scrollcue { position: absolute; left: 0; right: 0; bottom: 0; height: 110px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 16px; pointer-events: none; background: linear-gradient(to bottom, transparent, rgba(0,0,0,.35)); transition: opacity .3s; border-radius: 0 0 12px 12px; }
+.scrollcue span { pointer-events: auto; cursor: pointer; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px; padding: 9px 16px; border-radius: 999px; box-shadow: 0 6px 18px -6px rgba(0,0,0,.5); display: inline-flex; gap: 8px; align-items: center; }
+.scrollcue span i { font-style: normal; display: inline-block; animation: bob 1.2s ease-in-out infinite; }
+.scrollcue.gone { opacity: 0; }
+.scrollcue.gone span { pointer-events: none; }
+@keyframes bob { 50% { transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .scrollcue span i { animation: none; } }
+.hint { position: absolute; left: 12px; bottom: 12px; background: rgba(23,25,26,.82); color: #fff; font-size: 12px; padding: 6px 10px; border-radius: 6px; pointer-events: none; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+.card h3 { font: 600 13px/1 var(--font-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
+.card p { margin: 0 0 10px; max-width: 65ch; }
+.card p:last-child { margin-bottom: 0; }
+#context ul { margin: 0 0 10px; }
+.stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.stack span { font: 12px var(--font-mono); background: var(--frame); padding: 3px 8px; border-radius: 5px; }
+
+footer { border-top: 1px solid var(--line); padding: 20px 0 40px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+/* ---------- three-column layout: sections | screen | notes ---------- */
+.wrap { max-width: 1760px; padding: 0 20px; }
+.app { display: grid; grid-template-columns: 190px minmax(0, 1fr) 290px; gap: 18px; padding: 18px 0 40px; align-items: start; transition: grid-template-columns .35s ease; }
+.app.notes-hidden { grid-template-columns: 190px minmax(0, 1fr) 0px; }
+.app.notes-hidden .notes { opacity: 0; pointer-events: none; }
+.notes-open { display: none; }
+.app.notes-hidden .notes-open { display: inline-flex; }
+
+nav.rail { position: sticky; top: 14px; display: flex; flex-direction: column; gap: 2px; }
+.rail-label { font: 500 11px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 6px 0 10px 10px; }
+.rail-pill { position: absolute; left: 0; right: 0; top: 0; height: 0; border-radius: 9px; background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); transition: top .45s cubic-bezier(.3,.9,.3,1), height .45s cubic-bezier(.3,.9,.3,1); pointer-events: none; }
+.rail button { all: unset; position: relative; z-index: 1; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 9px 10px 9px 12px; border-radius: 9px; color: var(--ink); font-size: 14px; transition: color .25s; }
+.rail button { transition: color .25s, background .2s, transform .2s; }
+.rail button:hover { background: rgba(29,107,71,.08); transform: translateX(3px); color: var(--accent); }
+.rail button .who { transition: transform .2s; }
+.rail button:hover .who { transform: scale(1.5); }
+.rail button:hover small { color: var(--accent); }
+.rail button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.rail button[aria-current="true"] { color: var(--accent); font-weight: 600; }
+.rail button[aria-current="true"]:hover { background: transparent; transform: none; }
+.rail button small { font: 400 11px var(--font-mono); color: var(--muted); }
+.rail button.flash { animation: railflash .7s ease; }
+@keyframes railflash { 0% { transform: translateX(0); } 30% { transform: translateX(6px); } 100% { transform: translateX(0); } }
+.rail .who { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: 1px; }
+.who.me { background: var(--accent); } .who.team { background: var(--team); }
+.legend { margin: 16px 10px 0; display: grid; gap: 6px; font-size: 12px; color: var(--muted); }
+.legend .who { margin-right: 6px; }
+
+.stage-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.title-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.title-row.enter { animation: titlein .35s ease; }
+@keyframes titlein { from { opacity: 0; transform: translateY(6px); } }
+
+/* screen sized to the window: stage head + browser chrome + tip sit around it */
+.browser { width: min(100%, max(520px, calc((100vh - 168px) * 1.6))); margin: 0 auto; }
+.chrome { gap: 10px; }
+.url { flex: 0 1 300px; }
+.where { flex: 0 1 auto; min-width: 0; display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.where b { color: var(--ink); font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+#count { font-family: var(--font-mono); font-size: 11px; }
+.viewport { position: relative; overflow: hidden; }
+.ghost { position: absolute; inset: 0; overflow: hidden; background: var(--surface); z-index: 2; pointer-events: none; }
+.ghost video { width: 100%; height: 100%; object-fit: contain; background: #000; display: block; }
+.ghost img { display: block; width: 100%; height: auto; }
+
+.arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 4; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center; background: rgba(23,25,26,.55); color: #fff; opacity: .55; transition: opacity .2s, background .2s; }
+.arrow svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.arrow.left { left: 12px; } .arrow.right { right: 12px; }
+.viewport:hover .arrow { opacity: .9; }
+.arrow:hover, .arrow:focus-visible { opacity: 1; background: var(--accent); }
+.arrow[disabled] { opacity: 0 !important; pointer-events: none; }
+
+/* filmstrip dock */
+.dock { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
+.strip { pointer-events: auto; width: 100%; display: flex; gap: 10px; overflow-x: auto; padding: 12px 14px; background: rgba(14,16,17,.82); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transform: translateY(100%); transition: transform .22s ease; scrollbar-width: thin; }
+.dock.open .strip { transform: none; }
+.thumb { all: unset; position: relative; cursor: pointer; flex: 0 0 132px; border-radius: 7px; overflow: hidden; border: 2px solid transparent; background: #fff; opacity: .42; filter: brightness(.7) saturate(.8); transition: opacity .18s, filter .18s, transform .18s, border-color .18s; }
+.thumb:hover, .thumb:focus-visible { opacity: 1; filter: none; transform: translateY(-3px); }
+.thumb[aria-current="true"] { opacity: 1; filter: none; border-color: #8fd19e; box-shadow: 0 0 0 3px rgba(143,209,158,.35); }
+.thumb:focus-visible { outline: 2px solid #8fd19e; outline-offset: 1px; }
+.thumb img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; object-position: top left; }
+.thumb span { display: block; padding: 4px 7px; font-size: 11px; color: #3b3f42; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thumb .play { position: absolute; left: 0; right: 0; top: 0; aspect-ratio: 16/10; display: grid; place-items: center; background: rgba(0,0,0,.18); }
+.thumb .play i { width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,.62); display: grid; place-items: center; box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
+.thumb .play i::before { content: ""; margin-left: 3px; border-left: 11px solid #fff; border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+.thumb .vbar { position: absolute; left: 6px; right: 6px; top: calc(132px * 10 / 16 - 12px); height: 3px; border-radius: 2px; background: rgba(255,255,255,.55); }
+.thumb .vbar::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 35%; background: #ff4d4d; border-radius: 2px; }
+.playing .dock { bottom: 52px; }
+.viewport:has(.dock.open) .scrollcue { opacity: 0; }
+.tip { text-align: center; color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+
+/* notes column */
+.notes { position: sticky; top: 14px; max-height: calc(100vh - 28px); overflow-y: auto; display: flex; flex-direction: column; gap: 14px; transition: opacity .25s; scrollbar-width: thin; }
+.notes-head { display: flex; justify-content: space-between; align-items: center; font: 500 11px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 6px 2px 0; }
+.linkbtn { all: unset; cursor: pointer; font: 500 12px var(--font-body); letter-spacing: 0; text-transform: none; color: var(--accent); }
+.linkbtn:hover { text-decoration: underline; }
+.notes .card { padding: 14px 16px; font-size: 13px; line-height: 1.5; border-top-width: 3px; }
+.notes .card p { margin-bottom: 8px; }
+.notes .card ul { gap: 5px; padding-left: 16px; }
+.notes .card h3 { margin: 0 0 10px; }
+.notes .card h3 span { display: inline-block; padding: 5px 9px; border-radius: 6px; letter-spacing: .06em; }
+.note-context { border-top-color: #3b6fb6; }
+.note-context h3 span { background: #e5eefa; color: #24548f; }
+.note-built { border-top-color: var(--accent); }
+.note-built h3 span { background: var(--accent-soft); color: var(--accent); }
+.notes .stack span { font-size: 11px; }
+.notes.enter .card { animation: titlein .35s ease; }
+
+@media (prefers-reduced-motion: reduce) { .strip, .rail-pill, .app { transition: none; } .title-row.enter, .notes.enter .card, .rail button.flash { animation: none; } }
+@media (hover: none) {
+  .dock { position: static; pointer-events: auto; }
+  .strip { transform: none; background: none; backdrop-filter: none; padding: 10px 0 0; }
+  .thumb { background: var(--surface); border-color: var(--line); }
+  .playing .dock { bottom: 0; }
+  .tip { display: none; }
+  .arrow { opacity: .85; width: 40px; height: 40px; }
+}
+@media (max-width: 1180px) {
+  .app, .app.notes-hidden { grid-template-columns: 200px minmax(0, 1fr); }
+  .notes { grid-column: 1 / -1; position: static; max-height: none; display: grid; grid-template-columns: 1fr 1fr; opacity: 1 !important; pointer-events: auto !important; }
+  .notes-head, .notes-open { display: none !important; }
+}
+@media (max-width: 820px) {
+  header.top { grid-template-columns: 1fr; }
+  .facts { justify-content: flex-start; }
+  .app, .app.notes-hidden { grid-template-columns: 1fr; }
+  nav.rail { position: static; flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; }
+  .rail-label, .legend, .rail-pill { display: none; }
+  .rail button { white-space: nowrap; border: 1px solid var(--line); background: var(--surface); }
+  .rail button[aria-current="true"] { background: var(--accent-soft); }
+  .rail button small { display: none; }
+  .notes { grid-template-columns: 1fr; }
+  .where #cap { display: none; }
+}
+@media (max-width: 480px) { .wrap { padding: 0 16px; } .hint { display: none; } .url { display: none; } .arrow { width: 34px; height: 34px; } }
+.sitebar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0 0; font-size: 14px; }
+.sitebar a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.sitebar a:hover { text-decoration: underline; }
+.sitebar span { color: var(--muted); font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+@media (max-width: 640px) { .sitebar span { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="sitebar" aria-label="Site"><a href="../index.html">← All work</a><span>Pahul Sachdev</span><a href="../work/dealership-ai/index.html">Next: Dealership assistant →</a></nav>
+  <header class="top">
+    <div>
+      <p class="kicker">Portfolio · Title Software Inc. · Co-founder &amp; COO, Dec 2025 – Aug 2026</p>
+      <h1>Title, an RCS messaging and automation platform</h1>
+      <p class="lede">Title let businesses send rich, branded text messages (images, carousels, tap-to-reply buttons) and automate them as flows. Click through it by section below. Click the highlighted spots on a screen to move around like you would in the real app, or play a clip to see it working.</p>
+    </div>
+    <div class="facts">
+      <div class="fact"><b>410</b><span>commits from me</span></div>
+      <div class="fact"><b>3 / 3</b><span>RCS senders approved</span></div>
+      <div class="fact"><b>~30 → 2 min</b><span>flow build time with AI</span></div>
+    </div>
+  </header>
+
+  <div class="app" id="app">
+    <nav class="rail" id="rail" aria-label="Sections">
+      <p class="rail-label">Sections</p>
+      <div class="rail-pill" id="railpill" aria-hidden="true"></div>
+    </nav>
+
+    <section class="theater" id="theater" aria-label="Walkthrough">
+      <div class="stage-head">
+        <div class="title-row" id="titlerow">
+          <h2 id="sec-title"></h2>
+          <span class="badge" id="sec-badge"></span>
+        </div>
+        <div class="controls">
+          <button class="btn" id="hotbtn" aria-pressed="false">Show clickable spots</button>
+          <button class="btn" id="clipbtn" aria-pressed="false">▶ Watch it work</button>
+          <button class="btn notes-open" id="notesopen" aria-controls="notes">Notes ‹</button>
+        </div>
+      </div>
+
+      <div class="browser" id="browser">
+        <div class="chrome">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <div class="url" id="url"></div>
+          <div class="where"><span id="cap"></span><span id="count"></span></div>
+        </div>
+        <div class="viewport" id="viewport">
+          <div class="screen" id="screen"></div>
+          <button class="arrow left" id="prev" aria-label="Previous screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button class="arrow right" id="next" aria-label="Next screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+          <div class="dock" id="dock">
+            <div class="strip" id="strip" aria-label="Screens in this section"></div>
+          </div>
+        </div>
+      </div>
+      <p class="tip">Arrows on the screen or your ← → keys move through everything. Hover the bottom of the screen to see every screen in this section.</p>
+    </section>
+
+    <aside class="notes" id="notes" aria-label="About this section">
+      <div class="notes-head"><span>About this section</span><button class="linkbtn" id="noteshide" aria-controls="notes">Hide ›</button></div>
+      <div class="card note-context"><h3><span>Context</span></h3><div id="context"></div></div>
+      <div class="card note-built"><h3><span>What I built</span></h3><ul id="built"></ul><div class="stack" id="stack"></div></div>
+    </aside>
+  </div>
+
+  <footer>
+    <span>Screens are from my local copy of the app, run with made-up demo data. Pine Hollow Golf Club and every person shown are fictional. No customer data or source code is included.</span>
+    <span>Pahul Sachdev · <a href="https://github.com/pahul-sachdev">github.com/pahul-sachdev</a></span>
+  </footer>
+</div>
+
+<script>
+const HOT = {
+  shell: [
+    { l: 'Home', to: 'home', x: 3.38, y: 14.15, w: 7, h: 3.2 },
+    { l: 'Conversations', to: 'conv-list', x: 3.38, y: 18.95, w: 7, h: 3.2 },
+    { l: 'Creations', to: 'flows-list', x: 3.38, y: 23.75, w: 7, h: 3.2 },
+    { l: 'Settings', to: 'settings-agent', x: 3.38, y: 90.6, w: 7, h: 3.2 },
+  ],
+  home: [
+    { l: 'Conversations', to: 'conv-list', x: 3.38, y: 19.35, w: 7, h: 3.2 },
+    { l: 'Creations', to: 'flows-list', x: 3.38, y: 24.15, w: 7, h: 3.2 },
+    { l: 'Settings', to: 'settings-agent', x: 3.38, y: 90.6, w: 7, h: 3.2 },
+  ],
+  homeContinue: [
+    { l: 'Conversations', to: 'conv-list', x: 3.38, y: 23.95, w: 7, h: 3.2 },
+    { l: 'Creations', to: 'flows-list', x: 3.38, y: 28.75, w: 7, h: 3.2 },
+    { l: 'Get Verified', to: 'verify-form', x: 86.3, y: 43.6, w: 9.4, h: 4.6 },
+    { l: 'Get Verified', to: 'verify-form', x: 0.8, y: 6.5, w: 12.8, h: 4.2 },
+  ],
+  conv: [
+    { l: 'Home', to: 'home', x: 3.38, y: 14.55, w: 7, h: 3.2 },
+    { l: 'Creations', to: 'flows-list', x: 3.38, y: 24.15, w: 7, h: 3.2 },
+    { l: 'Settings', to: 'settings-agent', x: 3.38, y: 90.6, w: 7, h: 3.2 },
+  ],
+  settings: [
+    { l: 'Brand details', to: 'settings-brand', x: 16.94, y: 18.98, w: 6.5, h: 3.15 },
+    { l: 'RCS agent', to: 'settings-agent', x: 16.94, y: 22.73, w: 6.5, h: 3.15 },
+    { l: 'Team Members', to: 'settings-team', x: 16.94, y: 26.48, w: 6.5, h: 3.15 },
+    { l: 'Credits & usage', to: 'settings-credits', x: 16.94, y: 48.48, w: 6.9, h: 3.15 },
+  ],
+  hq: [
+    { l: 'Dashboard', to: 'hq-dashboard', x: 3.38, y: 8.7, w: 6, h: 3.2 },
+    { l: 'Analytics', to: 'hq-analytics', x: 3.38, y: 23.1, w: 6, h: 3.2 },
+    { l: 'Support Tickets', to: 'hq-tickets', x: 3.38, y: 32.7, w: 7.4, h: 3.2 },
+    { l: 'Tasks', to: 'hq-tasks', x: 3.38, y: 37.5, w: 6, h: 3.2 },
+  ],
+  tabs: [
+    { l: 'Message Builder', to: 'studio-card', x: 36.04, y: 5, w: 9.48, h: 4 },
+    { l: 'Flow Builder', to: 'fb2-finished', x: 45.6, y: 5, w: 8.6, h: 4 },
+  ],
+  tabs2: [
+    { l: 'Message Builder', to: 'studio-card', x: 34.9, y: 6.1, w: 9.7, h: 3.3 },
+    { l: 'Flow Builder', to: 'fb2-finished', x: 44.8, y: 6.1, w: 9.6, h: 3.3 },
+  ],
+  groups: [
+    { l: 'welcome', to: 'studio-card', x: 5.2, y: 10.4, w: 18, h: 5.6 },
+    { l: 'deals', to: 'studio-carousel', x: 5.2, y: 39.2, w: 18, h: 5.6 },
+  ],
+};
+const shellPlus = (...extra) => [...HOT.shell, ...extra];
+
+const SECTIONS = [
+  { id: 'website', name: 'Marketing website', who: 'me', badge: 'Built by me', dates: 'Nov 2025 – Apr 2026',
+    url: 'titlebm.com',
+    built: [
+      'Designed and built the public site in Next.js: hero, a tabbed RCS feature explorer with phone demos, and the waitlist.',
+      'Built the "Create your first RCS message" sandbox: a visitor uploads a logo, writes a rich card, adds buttons and quick replies, and watches it build live on the phone before sending it to themselves.',
+      'Laid out every section for phones as well as desktop.',
+    ],
+    stack: ['Next.js', 'React', 'TypeScript', 'CSS'],
+    context: '<p>This is the site as I left it at launch in December 2025, with regular updates through April 2026. The live site today is not my version.</p><p>It was the front door for golf courses and other local businesses: explain what RCS is in plain terms, show it on a real-looking phone, and let a visitor build and send a message to their own phone in about a minute.</p>',
+    screens: [
+      { id: 'web-hero', t: 'Homepage hero', hot: [{ l: 'Create RCS Now', to: 'web-sandbox', x: 3, y: 60.5, w: 18, h: 7.5 }] },
+      { id: 'web-carousels', t: 'Feature explorer: carousels' },
+      { id: 'web-qr', t: 'Feature explorer: quick replies' },
+      { id: 'web-sandbox', t: 'Send-to-your-phone sandbox' },
+      { id: 'web-mobile-full', t: 'Phone layout, full page', tall: true, narrow: true },
+      { id: 'web-full', t: 'Full page, Dec 2025', tall: true },
+      { id: 'web-apr-full', t: 'Full page, Apr 2026', tall: true },
+    ], clips: [{ id: 'website-sandbox', t: 'Build and send your own message' }, { id: 'website-features', t: 'Feature explorer' }] },
+  { id: 'message-builder', name: 'Message builder', who: 'me', badge: 'Built by me', url: 'app.titlebm.com/studio · Message Builder',
+    built: [
+      'Built the RCS message builder: rich cards, swipeable carousels, plain text and media, with a live iPhone preview that updates as you type.',
+      'Action buttons with five types: open a link, call a number, add an event to the calendar, send a location, or ask for the customer\'s location.',
+      'Quick replies that link one message to the next: each reply has a "Goes to" setting that picks which message group it opens, which is how a single text becomes a menu.',
+      'A phone preview you can actually use: tap a reply and it plays the next message, like the customer would see it. Multiple buttons fold into a menu, and Reset starts the conversation over.',
+      'Personalization variables like {first_name}, and character limits that change with the messaging provider so nothing gets cut off at send time.',
+    ],
+    stack: ['React', 'TypeScript', 'Supabase', 'Pinnacle & Twilio RCS'],
+    context: '<p><b>First, what is RCS?</b> RCS (Rich Communication Services) is the upgrade to regular text messaging. It arrives in the phone\'s normal Messages app, no app download, but instead of a plain text from a random number, the customer sees the business\'s verified name and logo, photos, swipeable cards and buttons they can tap. Think of it as a mini app inside a text.</p><p><b>What this screen does.</b> It\'s where a business writes those messages. You build a card (photo, title, description), add buttons (open a website, call, add to calendar) and quick replies, which are tap-to-answer options like "Book a Tee Time". The phone on the right shows exactly what the customer will see, and you can tap through it to test the conversation before anything is sent.</p><p><b>Why it matters.</b> Each quick reply can lead to a different next message, so one text becomes a menu the customer moves through by tapping. The flow builder (next section) lays those paths out visually.</p>',
+    screens: [
+      { id: 'studio-card', t: 'Rich card with quick replies', hot: [...HOT.tabs, ...HOT.groups] },
+      { id: 'studio-carousel', t: 'Three-card carousel', hot: [...HOT.tabs, ...HOT.groups] },
+      { id: 'mb-button-types', t: 'Button types', hot: HOT.tabs },
+      { id: 'mb-buttons-preview', t: 'Buttons in the preview', hot: HOT.tabs },
+      { id: 'mb-qr-routing', t: 'Routing a reply to the next message', hot: HOT.tabs },
+      { id: 'mb-phone-tapthrough', t: 'Tapping through in the preview', hot: HOT.tabs },
+    ], clips: [{ id: 'message-builder-deep', t: 'Buttons, reply routing, tap-through' }] },
+  { id: 'flow-builder', name: 'Flow builder', who: 'me', badge: 'My idea · I led the build', url: 'app.titlebm.com/studio · Flow Builder',
+    built: [
+      'Pitched the pivot: RCS messages are really flows, since every button tap can lead to a different next message. I sketched the UI live on my iPad to get the team on board.',
+      'Led the build and owned the UI/UX of the visual canvas: triggers, branches for each reply button, waits, and action steps.',
+      'Node editor that opens over the canvas, auto-layout, and a phone preview beside the canvas that follows whichever message you select.',
+      'App steps right on the canvas: after a reply, a flow can create a Google Calendar event, add a HubSpot contact, and so on. Flows can also start from events in those apps, like a new Calendly booking or a Shopify order.',
+      'Built how triggers and app steps get picked, configured and attached to messages, and worked on the HubSpot integration.',
+    ],
+    stack: ['React Flow', 'React', 'TypeScript', 'Inngest'],
+    context: '<p><b>The problem.</b> Once a message has tap-to-reply buttons, every tap can lead somewhere different. Managing that as a pile of separate messages gets confusing fast, and businesses also wanted those conversations to do things, like book an appointment or add the customer to their CRM.</p><p><b>What it is.</b> A visual map of an automated text conversation, read top to bottom. Each box is one step:</p><ul><li><b>Trigger:</b> what starts it, like a customer texting a keyword or someone booking on Calendly.</li><li><b>Message:</b> an RCS message from the message builder.</li><li><b>Branches:</b> one path for each reply button the customer can tap.</li><li><b>Wait:</b> pause before the next step, like "follow up in 1 day".</li><li><b>App action:</b> do something in another tool, like create a Google Calendar event or a HubSpot contact.</li></ul><p><b>Why it mattered.</b> A golf course or salon could build an automated booking or promo conversation without writing code, wired into the tools it already used. It became Title\'s core product.</p><p><b>The demo here.</b> A golf course wants people to book tee times by text. A customer texts TEE and gets a card with Saturday and Sunday buttons. Saturday books it on Google Calendar and sends a confirmation; Sunday adds them to HubSpot. Use Next to walk through it being built step by step, or play the clip.</p><p>Apps you could plug in: HubSpot, GoHighLevel, Shopify, Clover, Google Calendar, Google Meet, Calendly, Mindbody and QuickBooks, plus email and Title\'s own contact actions.</p>',
+    screens: [
+      { id: 'fb2-finished', t: 'A finished flow: book a tee time by text', hot: [...HOT.tabs2] },
+      { id: 'fb2-blank', t: 'Step 1: start from a blank canvas', hot: [...HOT.tabs2, { l: 'Trigger', to: 'fb2-trigger-pick', x: 23.4, y: 16, w: 27.6, h: 24.8 }] },
+      { id: 'fb2-trigger-pick', t: 'Step 2: pick what starts the flow', hot: [...HOT.tabs2, { l: 'On App Event', to: 'fb2-trigger-apps', x: 53.4, y: 39.2, w: 22.3, h: 5.8 }] },
+      { id: 'fb2-trigger-apps', t: '…or start it from an event in another app', hot: HOT.tabs2 },
+      { id: 'fb2-card-edit', t: 'Step 3: write the message, add reply buttons', hot: HOT.tabs2 },
+      { id: 'fb2-action-apps', t: 'Step 4: after "Saturday", do something in an app', hot: HOT.tabs2 },
+      { id: 'fb2-gcal-actions', t: 'Google Calendar actions', hot: HOT.tabs2 },
+      { id: 'fb2-hubspot-actions', t: 'HubSpot actions for the "Sunday" path', hot: HOT.tabs2 },
+      { id: 'fb2-zoom-top', t: 'Close-up: trigger and first message', hot: HOT.tabs2 },
+      { id: 'fb2-zoom-branches', t: 'Close-up: one path per reply', hot: HOT.tabs2 },
+      { id: 'fb2-finished-tap', t: 'Step 5: test it by tapping the phone preview', hot: HOT.tabs2 },
+    ], clips: [{ id: 'flow-builder-build', t: 'Building a flow from a blank canvas' }] },
+  { id: 'conversations', name: 'Conversations', who: 'team', badge: 'Team build · my parts listed', url: 'app.titlebm.com/brand/conversations',
+    built: [
+      'Rendered full RCS cards and carousels inside the inbox, so staff see exactly what the customer saw.',
+      'Layered read receipts, the opted-in/out badge, and blocked sending to anyone who opted out.',
+      'Fixed overflow and layout bugs on long cards and descriptions.',
+    ],
+    stack: ['React', 'Supabase Realtime', 'CSS'],
+    context: '<p>The two-way inbox where a business replies to customers. The base inbox was a team effort; the items on the left are mine.</p>',
+    screens: [
+      { id: 'conv-list', t: 'Inbox', hot: [...HOT.conv, { l: 'Alex Morgan', to: 'conv-thread', x: 16.3, y: 23.9, w: 18.9, h: 7.1 }] },
+      { id: 'conv-thread', t: 'Conversation with RCS cards', hot: HOT.conv },
+      { id: 'conv-thread-end', t: 'Booking confirmed', hot: HOT.conv },
+    ], clips: [{ id: 'conversations', t: 'Opening a conversation' }] },
+  { id: 'verification', name: 'RCS verification', who: 'me', badge: 'Built by me', url: 'app.titlebm.com/brand · Get verified',
+    built: [
+      'Built the verification flow every business went through: brand details, payment, onboarding call, agent setup, then carrier review.',
+      'A status card on the home screen whose copy and button change with each stage, and a "You\'re verified" card with live status for AT&T, T-Mobile, Verizon, AEGIS and Google.',
+      'The RCS agent settings card with a phone preview of the brand\'s profile, plus a brand color picker.',
+    ],
+    stack: ['React', 'TypeScript', 'Stripe', 'Pinnacle API'],
+    context: '<p>Every business has to pass Twilio/Pinnacle, Google and carrier review before it can send RCS. After running Title\'s own sender through it, I built this to collect everything from a client in one pass and show where they were. All three senders we submitted were approved.</p>',
+    screens: [
+      { id: 'home-continue', t: 'Status card before verifying', hot: HOT.homeContinue },
+      { id: 'verify-form', t: 'Brand verification step' },
+      { id: 'home-verified', t: 'Verified, live on every carrier', hot: HOT.home },
+      { id: 'settings-agent', t: 'RCS agent settings', hot: [...HOT.shell, ...HOT.settings] },
+    ], clips: [{ id: 'verification', t: 'Starting verification' }] },
+  { id: 'creations', name: 'Flows, folders & calendar', who: 'team', badge: 'Team build · my parts listed', url: 'app.titlebm.com/brand/creations',
+    built: [
+      'Reorganized saved work under Creations, with folders to file flows and move them in bulk.',
+      'Flow list with tags, filters, live/inactive status and per-flow icons.',
+      'Calendar of scheduled sends and campaigns, and the redesigned send/schedule modal behind it.',
+    ],
+    stack: ['React', 'Next.js App Router', 'Supabase'],
+    context: '<p>Where a business keeps its flows and plans what goes out when.</p>',
+    screens: [
+      { id: 'flows-list', t: 'Flow library', hot: shellPlus({ l: 'Pine Hollow — Text MENU', to: 'studio-card', x: 26.6, y: 32.5, w: 11.2, h: 3.3 }) },
+      { id: 'folders', t: 'Folders', hot: shellPlus({ l: 'Promotions', to: 'folder-open', x: 23, y: 33, w: 5.7, h: 3.3 }) },
+      { id: 'folder-open', t: 'Inside a folder', hot: shellPlus({ l: 'Folders', to: 'folders', x: 24.8, y: 9.2, w: 3.4, h: 2.4 }) },
+      { id: 'cal-month', t: 'Calendar, month view', hot: HOT.shell },
+      { id: 'cal-week', t: 'Calendar, week view', hot: HOT.shell },
+    ] },
+  { id: 'settings', name: 'Settings & billing', who: 'team', badge: 'Team build · my parts listed', url: 'app.titlebm.com/brand/settings',
+    built: [
+      'Rebuilt settings into a sidebar layout with roles, team invites and phone verification.',
+      'Keyword replies: businesses choose which words opt people out, back in, or ask for help, and what Title replies (STOP always stays on).',
+      'Billing redesign: subscription, credit balance, pricing, a usage chart and transaction history.',
+      'The opt-out sync behind the keyword card, so a STOP handled by the carrier side still updates the contact in Title.',
+    ],
+    stack: ['React', 'Stripe', 'Recharts', 'Twilio'],
+    context: '<p>This is the back office of a business\'s account: who on the staff can log in and what each person is allowed to do, the brand info customers see, and how the business pays.</p><p>Title charged a monthly fee to host the business\'s RCS sender plus a few cents per message, paid from prepaid credits. Owners needed to see at a glance what they had left, what they were spending and on which message types, so billing had to be easy to read.</p><p>Keyword replies are there because carriers require them: if someone texts STOP, they have to be unsubscribed and told so. This page lets each business word those replies in its own voice while the required ones stay on.</p>',
+    screens: [
+      { id: 'settings-keywords', t: 'Keyword replies', hot: [...HOT.shell, ...HOT.settings] },
+      { id: 'settings-team', t: 'Team & roles', hot: [...HOT.shell, ...HOT.settings] },
+      { id: 'settings-brand', t: 'Brand details', hot: [...HOT.shell, ...HOT.settings] },
+      { id: 'settings-credits', t: 'Billing & credits', hot: [...HOT.shell, ...HOT.settings] },
+      { id: 'settings-usage', t: 'Usage & transactions', hot: [...HOT.shell, ...HOT.settings] },
+    ] },
+  { id: 'dashboard', name: 'Home dashboard & contacts', who: 'team', badge: 'Team build', url: 'app.titlebm.com/brand',
+    built: [
+      'The verification card on the home screen (see RCS verification).',
+      'Contact import from phone contacts (VCF files) and the businesses feature on contacts.',
+    ],
+    stack: ['React', 'Supabase'],
+    context: '<p>Shown so you can see the whole product. Home is the first screen a business sees after logging in: a prompt box for Title\'s AI assistant, shortcuts, and a quick read on how its messages are doing. Contacts is the customer list, with opt-in status, tags and lists used to pick who gets each send.</p>',
+    screens: [
+      { id: 'home', t: 'Brand home', hot: HOT.home },
+      { id: 'contacts', t: 'Contacts', hot: HOT.shell },
+    ] },
+  { id: 'org', name: 'Organization view', who: 'team', badge: 'Team build', url: 'app.titlebm.com/org',
+    built: [
+      'Per-brand role assignments, so a manager can be scoped to one location or the whole organization.',
+      'Org-level settings and notifications, and the agent selector shared across brands.',
+      'Loading skeletons and faster server-side loading on every org page.',
+    ],
+    stack: ['Next.js', 'Supabase', 'Recharts'],
+    context: '<p>A business with several locations (here a golf group with a course, a driving range and a restaurant) sees all of them in one place: totals, analytics across brands, and the list of brands to jump into.</p>',
+    screens: [
+      { id: 'org-dashboard', t: 'Organization dashboard', hot: [
+        { l: 'Brands', to: 'org-brands', x: 0.8, y: 18.4, w: 8, h: 3.2 }, { l: 'Analytics', to: 'org-analytics', x: 0.8, y: 23.2, w: 8, h: 3.2 },
+        { l: 'View Analytics', to: 'org-analytics', x: 18.5, y: 64.5, w: 25.2, h: 10.4 }, { l: 'Manage Brands', to: 'org-brands', x: 44.7, y: 64.5, w: 25.1, h: 10.4 } ] },
+      { id: 'org-analytics', t: 'Analytics across brands', hot: [ { l: 'Dashboard', to: 'org-dashboard', x: 0.8, y: 8.6, w: 8, h: 3.2 }, { l: 'Brands', to: 'org-brands', x: 0.8, y: 18.4, w: 8, h: 3.2 } ] },
+      { id: 'org-brands', t: 'Brands in the organization', hot: [ { l: 'Dashboard', to: 'org-dashboard', x: 0.8, y: 8.6, w: 8, h: 3.2 }, { l: 'Analytics', to: 'org-analytics', x: 0.8, y: 23.2, w: 8, h: 3.2 }, { l: 'Pine Hollow Golf Club', to: 'home', x: 17.2, y: 17.3, w: 80, h: 9.9 } ] },
+    ] },
+  { id: 'hq', name: 'HQ admin', who: 'team', badge: 'Team build · my parts listed', url: 'app.titlebm.com/hq',
+    built: [
+      'Rebuilt the analytics dashboard with stat cards and theme-aware charts.',
+      'Dark mode across HQ (tickets, tasks, calendar, leads) and loading skeletons on every route.',
+      'Moved six HQ pages to load their data on the server so they open faster.',
+    ],
+    stack: ['Next.js', 'Recharts', 'Tailwind'],
+    context: '<p>Our internal tool for running the company across every client: messaging analytics, support tickets and the team\'s task board.</p>',
+    screens: [
+      { id: 'hq-dashboard', t: 'HQ dashboard', hot: HOT.hq },
+      { id: 'hq-analytics', t: 'Analytics', hot: HOT.hq },
+      { id: 'hq-tasks', t: 'Task board', hot: HOT.hq },
+      { id: 'hq-tickets', t: 'Support tickets', hot: HOT.hq },
+    ] },
+  { id: 'sign-in', name: 'Sign up & sign in', who: 'me', badge: 'Built by me', url: 'app.titlebm.com/signup',
+    built: [
+      'Three-step sign-up that verifies your phone over RCS before creating the account.',
+      'Three-step password reset with animated progress.',
+      'Login and invite-acceptance fixes.',
+    ],
+    stack: ['Next.js', 'Supabase Auth'],
+    context: '<p>The first thing every new customer saw.</p>',
+    screens: [
+      { id: 'auth-signup', t: 'Sign up' },
+      { id: 'auth-reset', t: 'Password reset' },
+      { id: 'auth-login', t: 'Log in' },
+    ] },
+];
+
+const INDEX = {};
+SECTIONS.forEach((s, si) => s.screens.forEach((sc, i) => { INDEX[sc.id] = { si, i }; }));
+
+const $ = (id) => document.getElementById(id);
+let cur = { si: 0, i: 0 }, playing = false, clipIdx = 0, showHot = false;
+
+const rail = $('rail');
+SECTIONS.forEach((s, si) => {
+  const b = document.createElement('button');
+  b.innerHTML = `<span><i class="who ${s.who}"></i>${s.name}</span><small>${s.screens.length}${s.clips ? '+' + s.clips.length : ''}</small>`;
+  b.title = `${s.screens.length} screens${s.clips ? ' + ' + s.clips.length + (s.clips.length > 1 ? ' clips' : ' clip') : ''}`;
+  b.onclick = () => go(s.screens[0].id);
+  b.dataset.si = si;
+  rail.appendChild(b);
+});
+const lg = document.createElement('div'); lg.className = 'legend';
+lg.innerHTML = '<span><i class="who me"></i>Built or led by me</span><span><i class="who team"></i>Team build, my parts listed</span>';
+rail.appendChild(lg);
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let last = null;   // what was on screen before this render, for the slide animation
+
+function go(id, push = true) {
+  const k = INDEX[id]; if (!k) return;
+  cur = { ...k }; playing = false;
+  if (push) { try { history.replaceState(null, '', '#' + id); } catch (e) {} }
+  render();
+}
+
+// Slide the old screen out and the new one in. Inside a section it's slow; jumping sections it's quick.
+function slide(scr, dir, fast) {
+  if (reduce || !dir || !scr.firstChild) return;
+  const ghost = document.createElement('div'); ghost.className = 'ghost';
+  const top = scr.scrollTop;
+  [...scr.children].forEach(n => { if (n.tagName === 'VIDEO') n.pause(); if (n.tagName === 'IMG' || n.tagName === 'VIDEO') ghost.appendChild(n.cloneNode(true)); });
+  if (top && ghost.firstChild) ghost.firstChild.style.marginTop = -top + 'px';
+  if (scr.classList.contains('narrow') && ghost.firstChild) { ghost.style.background = 'var(--frame)'; Object.assign(ghost.firstChild.style, { width: '390px', maxWidth: '80%', margin: (24 - top) + 'px auto 0', borderRadius: '28px', border: '8px solid #17191a' }); }
+  scr.parentElement.appendChild(ghost);
+  const d = fast ? 300 : 560, ease = 'cubic-bezier(.35,.8,.3,1)', dist = fast ? 22 : 34;
+  ghost.animate([{ transform: 'translateX(0)', opacity: 1 }, { transform: `translateX(${-dir * dist}%)`, opacity: 0 }], { duration: d, easing: ease }).onfinish = () => ghost.remove();
+  scr.animate([{ transform: `translateX(${dir * dist}%)`, opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }], { duration: d, easing: ease });
+}
+
+function moveRailPill(flash) {
+  const btn = rail.querySelector('button[aria-current="true"]'), pill = $('railpill');
+  if (!btn || getComputedStyle(pill).display === 'none') return;
+  pill.style.top = btn.offsetTop + 'px'; pill.style.height = btn.offsetHeight + 'px';
+  if (flash && !reduce) { btn.classList.remove('flash'); void btn.offsetWidth; btn.classList.add('flash'); }
+}
+
+function render() {
+  const s = SECTIONS[cur.si], sc = s.screens[cur.i];
+  const now = { si: cur.si, i: cur.i, playing, clipIdx };
+  const sectionChanged = last && last.si !== now.si;
+  let dir = 0, fast = false;
+  if (last) {
+    if (sectionChanged) { dir = Math.sign(now.si - last.si); fast = true; }
+    else if (last.playing !== now.playing) dir = now.playing ? -1 : 1;
+    else if (now.playing && last.clipIdx !== now.clipIdx) dir = Math.sign(now.clipIdx - last.clipIdx);
+    else if (last.i !== now.i) dir = Math.sign(now.i - last.i);
+  }
+  rail.querySelectorAll('button').forEach(b => b.setAttribute('aria-current', String(+b.dataset.si === cur.si)));
+  moveRailPill(sectionChanged);
+  if (sectionChanged && !reduce) { for (const el of [$('titlerow'), $('notes')]) { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); } resetNotesScroll(); }
+  $('browser').classList.toggle('playing', !!(playing && s.clips));
+  $('sec-title').textContent = s.name;
+  const bd = $('sec-badge'); bd.textContent = s.badge; bd.className = 'badge ' + s.who;
+  $('url').textContent = s.url;
+  $('built').innerHTML = s.built.map(x => `<li>${x}</li>`).join('');
+  $('stack').innerHTML = s.stack.map(x => `<span>${x}</span>`).join('');
+  $('context').innerHTML = s.context;
+
+  const scr = $('screen'); slide(scr, dir, fast); scr.innerHTML = ''; scr.className = 'screen' + (showHot ? ' showhot' : ''); scr.scrollTop = 0; scr.onscroll = null;
+  document.querySelectorAll('.scrollcue').forEach(e => e.remove());
+  const clipBtn = $('clipbtn');
+  clipBtn.disabled = !s.clips; clipBtn.setAttribute('aria-pressed', String(playing));
+  clipBtn.textContent = playing ? '■ Back to screens' : '▶ Watch it work';
+
+  if (playing && s.clips) {
+    const c = s.clips[clipIdx] || s.clips[0];
+    const v = document.createElement('video');
+    v.src = `clips/${c.id}.mp4`; v.poster = `clips/${c.id}-poster.jpg`;
+    v.controls = true; v.muted = true; v.playsInline = true; v.autoplay = true; v.loop = true;
+    scr.appendChild(v);
+    $('cap').innerHTML = `<b>▶ ${c.t}</b>`;
+    $('count').textContent = '';
+  } else {
+    if (sc.tall) {
+      scr.classList.add('tall'); if (sc.narrow) scr.classList.add('narrow');
+      const cue = document.createElement('div'); cue.className = 'scrollcue';
+      cue.innerHTML = '<span>Scroll to see the whole page <i>↓</i></span>';
+      cue.querySelector('span').onclick = () => scr.scrollBy({ top: scr.clientHeight * 0.8, behavior: 'smooth' });
+      scr.parentElement.insertBefore(cue, $('dock'));
+      scr.onscroll = () => cue.classList.toggle('gone', scr.scrollTop > 60);
+    }
+    const img = document.createElement('img');
+    img.src = `img/${sc.id}.jpg`; img.alt = `${s.name}: ${sc.t}`;
+    scr.appendChild(img);
+    (sc.hot || []).forEach(h => {
+      const b = document.createElement('button');
+      b.className = 'hot'; b.title = `Go to ${h.l}`; b.setAttribute('aria-label', `Go to ${h.l}`);
+      Object.assign(b.style, { left: h.x + '%', top: h.y + '%', width: h.w + '%', height: h.h + '%' });
+      b.onclick = () => go(h.to);
+      scr.appendChild(b);
+    });
+    if ((sc.hot || []).length) {
+      const hint = document.createElement('div'); hint.className = 'hint';
+      hint.textContent = `${sc.hot.length} clickable spot${sc.hot.length > 1 ? 's' : ''} on this screen`;
+      scr.appendChild(hint);
+    }
+    $('cap').innerHTML = `<b>${sc.t}</b>`;
+    $('count').textContent = `${cur.i + 1} / ${s.screens.length}`;
+  }
+
+  const strip = $('strip'); strip.innerHTML = '';
+  s.screens.forEach((x, i) => {
+    const t = document.createElement('button'); t.className = 'thumb';
+    t.setAttribute('aria-current', String(!playing && i === cur.i));
+    t.innerHTML = `<img src="img/${x.id}.jpg" alt="" loading="lazy"><span>${x.t}</span>`;
+    t.onclick = () => go(x.id);
+    strip.appendChild(t);
+  });
+  (s.clips || []).map((c, k) => [c, k]).reverse().forEach(([c, k]) => {
+    const t = document.createElement('button'); t.className = 'thumb clip';
+    t.setAttribute('aria-current', String(playing && clipIdx === k));
+    t.innerHTML = `<img src="clips/${c.id}-poster.jpg" alt="" loading="lazy"><div class="play"><i></i></div><div class="vbar"></div><span>${c.t}</span>`;
+    t.setAttribute('aria-label', `Play clip: ${c.t}`);
+    t.onclick = () => { playing = true; clipIdx = k; render(); };
+    strip.prepend(t);
+  });
+  const flat = SECTIONS.flatMap(x => x.screens.map(y => y.id));
+  const pos = flat.indexOf(sc.id);
+  $('prev').disabled = pos <= 0 && !playing; $('next').disabled = pos >= flat.length - 1;
+  last = now;
+  const on = strip.querySelector('[aria-current="true"]');
+  if (on) strip.scrollLeft = Math.max(0, on.offsetLeft - strip.clientWidth / 2 + on.clientWidth / 2);
+}
+
+function step(d) {
+  const flat = SECTIONS.flatMap(x => x.screens.map(y => y.id));
+  const pos = flat.indexOf(SECTIONS[cur.si].screens[cur.i].id);
+  const n = flat[Math.min(flat.length - 1, Math.max(0, pos + d))];
+  go(n);
+}
+$('prev').onclick = () => step(-1);
+$('next').onclick = () => step(1);
+
+// Notes column can be hidden to give the screen more room.
+$('noteshide').onclick = () => { $('app').classList.add('notes-hidden'); try { localStorage.setItem('notesHidden', '1'); } catch (e) {} setTimeout(() => moveRailPill(false), 400); };
+$('notesopen').onclick = () => { $('app').classList.remove('notes-hidden'); try { localStorage.removeItem('notesHidden'); } catch (e) {} };
+try { if (localStorage.getItem('notesHidden')) $('app').classList.add('notes-hidden'); } catch (e) {}
+addEventListener('resize', () => moveRailPill(false));
+
+let resetNotesScroll = () => { $('notes').scrollTop = 0; };
+// Long notes drift down slowly so the whole text gets seen. Hovering, scrolling or touching pauses it.
+(() => {
+  const el = $('notes'); if (reduce) return;
+  let held = false, wait = performance.now() + 3500, lastT = 0, pos = 0;
+  const hold = () => { held = true; }, release = () => { held = false; pos = el.scrollTop; wait = performance.now() + 2500; };
+  el.addEventListener('mouseenter', hold); el.addEventListener('mouseleave', release);
+  el.addEventListener('wheel', () => { pos = el.scrollTop; wait = performance.now() + 5000; }, { passive: true });
+  el.addEventListener('touchstart', hold, { passive: true }); el.addEventListener('touchend', release);
+  resetNotesScroll = () => { pos = 0; el.scrollTop = 0; wait = performance.now() + 3500; };
+  const tick = (t) => {
+    const dt = lastT ? Math.min(t - lastT, 50) : 0; lastT = t;
+    const max = el.scrollHeight - el.clientHeight;
+    if (!held && max > 4 && t > wait && getComputedStyle(el).position === 'sticky') {
+      if (pos >= max) { wait = t + 4000; pos = -1; }
+      else if (pos < 0) { el.scrollTo({ top: 0, behavior: 'smooth' }); pos = 0; wait = t + 3500; }
+      else { pos = Math.min(max, pos + dt * 0.022); el.scrollTop = pos; }
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+})();
+
+// Filmstrip dock: opens when the pointer reaches the bottom edge of the screen,
+// and closes as soon as the pointer leaves the strip.
+const dock = $('dock'), vp = dock.parentElement, stripEl = $('strip');
+const setDock = (open) => dock.classList.toggle('open', open);
+vp.addEventListener('mousemove', (e) => {
+  if (matchMedia('(hover: none)').matches) return;
+  const r = vp.getBoundingClientRect();
+  const zoneTop = r.bottom - (playing ? 210 : 150);          // generous trigger area along the bottom
+  if (!dock.classList.contains('open')) {
+    if (e.clientY > zoneTop) setDock(true);
+    return;
+  }
+  // close once the pointer is clearly above both the strip and the trigger area
+  const sr = stripEl.getBoundingClientRect();
+  if (e.clientY < Math.min(sr.top, zoneTop) - 12) setDock(false);
+});
+vp.addEventListener('mouseenter', (e) => {
+  if (matchMedia('(hover: none)').matches) return;
+  const r = vp.getBoundingClientRect();
+  if (e.clientY > r.bottom - (playing ? 210 : 150)) setDock(true);
+});
+vp.addEventListener('mouseleave', () => setDock(false));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setDock(false); });
+stripEl.addEventListener('focusin', () => setDock(true));
+stripEl.addEventListener('focusout', (e) => { if (!dock.contains(e.relatedTarget)) setDock(false); });
+$('hotbtn').onclick = () => { showHot = !showHot; $('hotbtn').setAttribute('aria-pressed', String(showHot)); $('screen').classList.toggle('showhot', showHot); };
+$('clipbtn').onclick = () => { playing = !playing; clipIdx = 0; render(); };
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input, textarea')) return;
+  if (e.key === 'ArrowRight') step(1);
+  if (e.key === 'ArrowLeft') step(-1);
+});
+window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (INDEX[id]) go(id, false); });
+const start = location.hash.slice(1);
+go(INDEX[start] ? start : 'fb2-finished', false);
+</script>
+</body>
+</html>

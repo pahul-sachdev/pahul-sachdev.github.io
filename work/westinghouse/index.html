@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuclear safety software verification at Westinghouse — Pahul Sachdev</title>
+<meta name="description" content="Software IV&amp;V internship at Westinghouse Electric: verifying safety-critical code changes and tracing every difference to its requirement.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../../index.html">Pahul Sachdev<span>.</span></a>
+    <nav class="topnav" aria-label="Main"><a href="../../index.html#work" aria-current="page">Work</a><a href="../../index.html#about" class="hide-sm">About</a><a href="../../index.html#contact">Contact</a></nav>
+  </div>
+</header>
+
+<main class="wrap narrow">
+  <section class="cs-hero">
+    <a class="back" href="../../index.html#work">← All work</a>
+    <p class="kicker">Westinghouse Electric · Software IV&amp;V intern · Summer 2025</p>
+    <h1>Verification of nuclear safety software</h1>
+    <p class="lede">In Westinghouse's Independent Verification &amp; Validation department, I checked changes to the software that protects nuclear plants: diffing the code, marking every difference, and tracing each one back to its requirement.</p>
+  </section>
+
+  <article class="cs">
+    <div class="note">Project names, plant details and system specifics are confidential to Westinghouse, so this page describes the work in general terms.</div>
+
+    <h2>What IV&amp;V is</h2>
+    <p>Independent Verification &amp; Validation checks that safety software meets its requirements and does its job correctly and reliably. Verification asks "are we building it right?" Validation asks "are we building the right thing?" The department is kept separate from the engineers who write the code, both financially and in who it reports to, so the review stays unbiased.</p>
+
+    <h2>What I did</h2>
+    <p>Plant protection systems run the same logic on several redundant processors, so if one fails, the others still protect the plant. My work was making sure those copies, and each new release, were exactly what they were supposed to be.</p>
+    <ul>
+      <li><b>Code diffs across redundant processors.</b> Compared the code running on each redundant channel side by side to confirm the copies matched where they should and differed only where the design said they could.</li>
+      <li><b>Diffs between releases.</b> Compared old and new versions of the code to find every change in a new release.</li>
+      <li><b>Greenlining.</b> Marked up every difference found, one by one, so nothing went unreviewed.</li>
+      <li><b>Tracing changes to requirements.</b> Traced each change back to the software requirements and design documents to confirm it was intended, documented and correct. A change with no requirement behind it is a finding.</li>
+      <li><b>Checking that review comments were fixed.</b> Confirmed that changes requested in earlier review rounds actually appeared in the next document revision.</li>
+    </ul>
+
+    <figure>
+      <div class="frame">
+        <svg class="dg" viewBox="0 0 760 210" role="img" aria-labelledby="w-t">
+          <title id="w-t">The verification loop: compare versions, greenline every difference, trace each one to a requirement, and either sign off or raise a finding</title>
+          <defs><marker id="wa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ar" d="M0 0 L10 5 L0 10z"/></marker></defs>
+          <rect class="box" x="10" y="60" width="140" height="74" rx="10"/><text class="t" x="80" y="88" text-anchor="middle">Two versions</text><text class="s" x="80" y="106" text-anchor="middle">channels or releases</text>
+          <rect class="box b" x="190" y="60" width="140" height="74" rx="10"/><text class="t" x="260" y="88" text-anchor="middle">Diff</text><text class="s" x="260" y="106" text-anchor="middle">find every difference</text>
+          <rect class="box b" x="370" y="60" width="140" height="74" rx="10"/><text class="t" x="440" y="88" text-anchor="middle">Greenline</text><text class="s" x="440" y="106" text-anchor="middle">mark each one</text>
+          <rect class="box b" x="550" y="60" width="200" height="74" rx="10"/><text class="t" x="650" y="88" text-anchor="middle">Trace to requirement</text><text class="s" x="650" y="106" text-anchor="middle">is it intended and documented?</text>
+          <rect class="box g" x="500" y="160" width="120" height="44" rx="8"/><text class="t" x="560" y="187" text-anchor="middle">Sign off</text>
+          <rect class="box r" x="640" y="160" width="110" height="44" rx="8"/><text class="t" x="695" y="187" text-anchor="middle">Finding</text>
+          <path class="ln" marker-end="url(#wa)" d="M150 97 H188"/><path class="ln" marker-end="url(#wa)" d="M330 97 H368"/><path class="ln" marker-end="url(#wa)" d="M510 97 H548"/>
+          <path class="ln" marker-end="url(#wa)" d="M620 134 C610 150 580 150 570 158"/><path class="ln" marker-end="url(#wa)" d="M680 134 V158"/>
+          <text class="k" x="560" y="152" text-anchor="end">YES</text><text class="k" x="690" y="152">NO</text>
+        </svg>
+      </div>
+      <figcaption>The loop I ran on every change. Simple on paper; the work is doing it for every single line, every time.</figcaption>
+    </figure>
+
+    <h2>What I learned</h2>
+    <p>Safety software is slow on purpose. When a failure can hurt people, every change needs a written reason and a second set of eyes, and "it probably works" isn't an answer. That discipline stuck with me. It's the same instinct behind building AI systems that say "I don't know" instead of guessing, and behind tracking whether a release actually delivered what it promised.</p>
+    <p>I also got fast at the work. By the end, diffing and greenlining had a real rhythm to it. When another intern joined a week after me, I helped get him set up, and teaching it made me understand it better.</p>
+
+    <h2>Tools</h2>
+    <div class="tags"><span class="tag">Beyond Compare</span><span class="tag">Requirements &amp; design specs</span><span class="tag">Change review records</span><span class="tag">PDF markup</span></div>
+
+    <nav class="next" aria-label="More work">
+      <a href="../baseplate/index.html"><span>Previous</span>← BasePlate</a>
+      <a href="../../title/index.html"><span>Next</span>Title →</a>
+    </nav>
+  </article>
+</main>
+<footer class="wrap narrow">© 2026 Pahul Sachdev</footer>
+</body>
+</html>

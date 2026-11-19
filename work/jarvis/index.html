@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jarvis, a personal AI memory layer — Pahul Sachdev</title>
+<meta name="description" content="Jarvis is a personal AI memory layer: one server every Claude chat, phone session and voice conversation connects to.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../../index.html">Pahul Sachdev<span>.</span></a>
+    <nav class="topnav" aria-label="Main"><a href="../../index.html#work" aria-current="page">Work</a><a href="../../index.html#about" class="hide-sm">About</a><a href="../../index.html#contact">Contact</a></nav>
+  </div>
+</header>
+
+<main class="wrap narrow">
+  <section class="cs-hero">
+    <a class="back" href="../../index.html#work">← All work</a>
+    <p class="kicker">Personal project · 2026 · In progress</p>
+    <h1>Jarvis, a personal AI memory layer</h1>
+    <p class="lede">A server I designed and built that every Claude chat, phone session and voice conversation connects to, so my assistant has the same context about my life everywhere. It runs on Cloudflare Workers and Postgres and is still in progress.</p>
+    <div class="facts">
+      <div class="fact"><b>1 server</b><span>shared by chat, phone and voice</span></div>
+      <div class="fact"><b>Learns areas</b><span>new parts of life get their own space</span></div>
+      <div class="fact"><b>Owner-only</b><span>Google sign-in, least-privilege DB, full audit log</span></div>
+    </div>
+  </section>
+
+  <article class="cs">
+    <div class="note amber">Jarvis is still being built and I use it every day, so this page explains the design. Screens will come once it's done, with made-up data in place of my real life.</div>
+
+    <h2>The problem</h2>
+    <p>I use AI assistants all day: in chat, on my phone, by voice. Each one knows only what I've told it in that conversation. My classes, job search, side projects, gym and plans live in my head and get re-explained over and over. The more I used AI, the more time went into catching it up.</p>
+
+    <h2>How it works</h2>
+    <p>Jarvis is a single server that every assistant connects to through the Model Context Protocol (MCP), the standard way AI apps plug into outside tools. Whatever surface I'm on, the assistant reads from and writes to the same memory.</p>
+
+    <figure>
+      <div class="frame">
+        <svg class="dg" viewBox="0 0 760 330" role="img" aria-labelledby="j-t">
+          <title id="j-t">Claude chat, phone and voice connect over MCP to a Jarvis server on Cloudflare Workers, which checks Google sign-in, then reads and writes Postgres with least-privilege access and logs every action</title>
+          <defs><marker id="ja" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ar" d="M0 0 L10 5 L0 10z"/></marker></defs>
+          <text class="k" x="80" y="26" text-anchor="middle">WHERE I TALK TO AI</text>
+          <rect class="box" x="10" y="42" width="140" height="58" rx="10"/><text class="t" x="80" y="68" text-anchor="middle">Claude chat</text><text class="s" x="80" y="86" text-anchor="middle">laptop, browser</text>
+          <rect class="box" x="10" y="136" width="140" height="58" rx="10"/><text class="t" x="80" y="162" text-anchor="middle">Phone</text><text class="s" x="80" y="180" text-anchor="middle">on the go</text>
+          <rect class="box" x="10" y="230" width="140" height="58" rx="10"/><text class="t" x="80" y="256" text-anchor="middle">Voice</text><text class="s" x="80" y="274" text-anchor="middle">hands-free</text>
+
+          <rect class="zone" x="200" y="34" width="330" height="268" rx="16"/>
+          <text class="k" x="365" y="26" text-anchor="middle">JARVIS · CLOUDFLARE WORKERS</text>
+          <rect class="box b" x="220" y="52" width="290" height="50" rx="10"/><text class="t" x="365" y="74" text-anchor="middle">Owner-only Google sign-in</text><text class="s" x="365" y="91" text-anchor="middle">only my account gets in</text>
+          <rect class="box g" x="220" y="122" width="290" height="88" rx="10"/><text class="t" x="365" y="146" text-anchor="middle">Memory tools (MCP)</text><text class="s" x="365" y="166" text-anchor="middle">capture · today · tasks · reminders</text><text class="s" x="365" y="184" text-anchor="middle">areas · pages · morning brief</text>
+          <rect class="box a" x="220" y="230" width="290" height="52" rx="10"/><text class="t" x="365" y="253" text-anchor="middle">Audit log</text><text class="s" x="365" y="270" text-anchor="middle">every action recorded</text>
+
+          <rect class="box" x="590" y="122" width="160" height="88" rx="10"/><text class="t" x="670" y="150" text-anchor="middle">Postgres</text><text class="s" x="670" y="170" text-anchor="middle">least-privilege</text><text class="s" x="670" y="186" text-anchor="middle">access</text>
+
+          <path class="ln" marker-end="url(#ja)" d="M150 71 C180 71 190 77 218 77"/>
+          <path class="ln" marker-end="url(#ja)" d="M150 165 H218"/>
+          <path class="ln" marker-end="url(#ja)" d="M150 259 C185 259 190 165 218 170"/>
+          <path class="ln" marker-end="url(#ja)" d="M510 166 H588"/>
+          <path class="ln d" d="M365 210 V230"/>
+          <text class="k" x="184" y="152" text-anchor="middle">MCP</text>
+        </svg>
+      </div>
+      <figcaption>Every surface talks to the same server, so a fact captured on my phone is there in the next laptop chat.</figcaption>
+    </figure>
+
+    <h2>What it does</h2>
+    <ul>
+      <li><b>Captures as I talk.</b> When I mention a task, a workout, a meal, a plan or a new lead, the assistant saves it right away. I don't have to say where it goes.</li>
+      <li><b>Learns new areas on its own.</b> When something new keeps coming up, like a new class or a new project, Jarvis gives it its own area with a short playbook for how to handle it.</li>
+      <li><b>Knows what matters and what's going stale.</b> Each area has an importance and a decay rate, so things I care about stay near the top and things I've stopped touching fade instead of cluttering every answer.</li>
+      <li><b>Briefs me every morning.</b> A short rundown of what's on my plate before the day starts.</li>
+    </ul>
+
+    <h2>Built to be trusted with my life</h2>
+    <p>A memory of everything is only useful if it's safe, so the security came first, not last.</p>
+    <ul>
+      <li><b>Owner-only Google OAuth.</b> The server only accepts my Google account. Nobody else can connect, even with the URL.</li>
+      <li><b>Least-privilege database access.</b> The server's database role can do exactly what the tools need and nothing more.</li>
+      <li><b>Every action logged.</b> Every action is recorded, so I can see exactly what an assistant did and when.</li>
+    </ul>
+
+    <h2>Stack</h2>
+    <div class="tags"><span class="tag">Cloudflare Workers</span><span class="tag">Postgres</span><span class="tag">Model Context Protocol</span><span class="tag">Google OAuth</span><span class="tag">Claude</span></div>
+
+    <nav class="next" aria-label="More work">
+      <a href="../dealership-ai/index.html"><span>Previous</span>← Dealership assistant</a>
+      <a href="../baseplate/index.html"><span>Next</span>BasePlate →</a>
+    </nav>
+  </article>
+</main>
+<footer class="wrap narrow">© 2026 Pahul Sachdev</footer>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-agent dealership assistant — Pahul Sachdev</title>
+<meta name="description" content="Rebuilding a car dealership's lead-response chatbot from one big agent into a director agent with specialists and an honest fallback.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../../index.html">Pahul Sachdev<span>.</span></a>
+    <nav class="topnav" aria-label="Main"><a href="../../index.html#work" aria-current="page">Work</a><a href="../../index.html#about" class="hide-sm">About</a><a href="../../index.html#contact">Contact</a></nav>
+  </div>
+</header>
+
+<main class="wrap narrow">
+  <section class="cs-hero">
+    <a class="back" href="../../index.html#work">← All work</a>
+    <p class="kicker">Case study · Effective Business Automations · AI automation developer · 2025</p>
+    <h1>Multi-agent lead-response assistant for a car dealership</h1>
+    <p class="lede">At Effective Business Automations, I rebuilt the AI that answered a car dealership's online leads by text. The original was one agent with one big prompt, and it sometimes made things up. I replaced it with a director agent that routes each question to a specialist working from the real inventory, plus a handoff to staff when it doesn't know.</p>
+    <div class="facts">
+      <div class="fact"><b>1 → team</b><span>one big agent became a director + specialists</span></div>
+      <div class="fact"><b>Real data</b><span>car answers pulled from the live inventory</span></div>
+      <div class="fact"><b>Honest fallback</b><span>unsure means a handoff, not a guess</span></div>
+    </div>
+  </section>
+
+  <article class="cs">
+    <h2>The setup</h2>
+    <p>The dealership (a local used-car lot) lists its cars on CarGurus, Edmunds, Cars.com and similar sites. When a shopper clicks "I'm interested" on one of those sites, the lead (name, phone, email, which car) lands in the dealer's inbox. The goal was simple: reply to every lead right away, at any hour.</p>
+    <p>So we automated the first response. A parser watched the dealer's inbox and pulled out each lead. Right away, the shopper got a text with a link to that car's full info packet and a short note: <em>"Saw you were interested in this car, let us know if you have any questions."</em> Any reply was answered by an AI agent. The pipeline ran on Make and Zapier, with OpenAI models doing the talking.</p>
+
+    <figure>
+      <div class="frame">
+        <svg class="dg" viewBox="0 0 760 150" role="img" aria-labelledby="pipe-t">
+          <title id="pipe-t">Lead pipeline: listing sites send a lead email, a parser pulls it out, the shopper gets a text, and replies go to the AI</title>
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ar" d="M0 0 L10 5 L0 10z"/></marker></defs>
+          <rect class="box" x="10" y="45" width="130" height="60" rx="10"/><text class="t" x="75" y="71" text-anchor="middle">Listing sites</text><text class="s" x="75" y="89" text-anchor="middle">CarGurus, Cars.com…</text>
+          <rect class="box" x="165" y="45" width="130" height="60" rx="10"/><text class="t" x="230" y="71" text-anchor="middle">Lead email</text><text class="s" x="230" y="89" text-anchor="middle">dealer's inbox</text>
+          <rect class="box b" x="320" y="45" width="130" height="60" rx="10"/><text class="t" x="385" y="71" text-anchor="middle">Parser</text><text class="s" x="385" y="89" text-anchor="middle">pulls name, phone, car</text>
+          <rect class="box b" x="475" y="45" width="130" height="60" rx="10"/><text class="t" x="540" y="71" text-anchor="middle">First text</text><text class="s" x="540" y="89" text-anchor="middle">info packet link</text>
+          <rect class="box g" x="630" y="45" width="120" height="60" rx="10"/><text class="t" x="690" y="71" text-anchor="middle">AI replies</text><text class="s" x="690" y="89" text-anchor="middle">to questions</text>
+          <path class="ln" marker-end="url(#ah)" d="M140 75 H163"/><path class="ln" marker-end="url(#ah)" d="M295 75 H318"/><path class="ln" marker-end="url(#ah)" d="M450 75 H473"/><path class="ln" marker-end="url(#ah)" d="M605 75 H628"/>
+          <text class="k" x="385" y="135" text-anchor="middle">MAKE + ZAPIER</text><text class="k" x="690" y="135" text-anchor="middle">OPENAI</text>
+        </svg>
+      </div>
+      <figcaption>The lead-response pipeline. The AI step at the end is what this case study is about.</figcaption>
+    </figure>
+
+    <h2>The problem: one agent doing everything</h2>
+    <p>The first version, built before I joined, was a single agent with one long prompt. It had to work out what the shopper wanted, know the inventory, know the dealership, and write the reply, all at once. With that much on its plate, it filled gaps by guessing.</p>
+    <p>The clearest example: a shopper asked if we could send a video of the car. He thought he was texting a salesperson. The bot replied with an enthusiastic yes. It had no way to record or send a video, so the video never came, and a real customer was left waiting on a promise the system couldn't keep.</p>
+
+    <div class="twocol">
+      <div class="panel">
+        <span class="label bad">Before · one agent</span>
+        <div class="chat" aria-label="Before: example conversation">
+          <div class="bub them">Can you send me a video of the car? Want to see the interior</div>
+          <div class="bub bot">Heck yes! I'll get a walkaround video over to you shortly 🎥</div>
+          <div class="bub them">ok thanks!</div>
+        </div>
+        <p class="verdict">No video ever came. The bot promised something it couldn't do.</p>
+      </div>
+      <div class="panel">
+        <span class="label good">After · director + specialists</span>
+        <div class="chat" aria-label="After: example conversation">
+          <div class="bub them">Can you send me a video of the car? Want to see the interior</div>
+          <div class="bub bot">I can't send videos from here, but there are 28 interior photos in the car's info packet: <u>link</u>. For a live walkaround, call us at (555) 010-0199 and someone will set it up.</div>
+        </div>
+        <p class="verdict">Honest about its limits, points to real photos, hands off to a person.</p>
+      </div>
+    </div>
+    <p class="muted" style="font-size:13px;margin-top:8px">Recreated conversations with made-up details. The dealership and its customers aren't named.</p>
+
+    <h2>What I built: a director and specialists</h2>
+    <p>My idea was to stop asking one agent to be good at everything. Every incoming text first goes to a <b>director agent</b>. Its only job is to work out what the shopper is asking and route it. It never answers anyone itself.</p>
+
+    <figure>
+      <div class="frame">
+        <svg class="dg" viewBox="0 0 760 330" role="img" aria-labelledby="ma-t">
+          <title id="ma-t">Multi-agent design: a director routes each text to an inventory agent, a dealership info agent, or an honest fallback; answers go through a reply writer</title>
+          <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ar" d="M0 0 L10 5 L0 10z"/></marker></defs>
+          <rect class="box" x="10" y="135" width="120" height="60" rx="10"/><text class="t" x="70" y="161" text-anchor="middle">Shopper's text</text><text class="s" x="70" y="179" text-anchor="middle">any question</text>
+          <rect class="box g" x="170" y="125" width="140" height="80" rx="12"/><text class="t" x="240" y="157" text-anchor="middle">Director agent</text><text class="s" x="240" y="176" text-anchor="middle">what are they asking?</text><text class="s" x="240" y="192" text-anchor="middle">routes, never answers</text>
+          <rect class="box b" x="370" y="22" width="160" height="62" rx="10"/><text class="t" x="450" y="49" text-anchor="middle">Inventory agent</text><text class="s" x="450" y="67" text-anchor="middle">looks the car up</text>
+          <rect class="box" x="580" y="22" width="150" height="62" rx="10"/><text class="t" x="655" y="49" text-anchor="middle">Inventory database</text><text class="s" x="655" y="67" text-anchor="middle">price, miles, features</text>
+          <rect class="box b" x="370" y="134" width="160" height="62" rx="10"/><text class="t" x="450" y="161" text-anchor="middle">Dealership agent</text><text class="s" x="450" y="179" text-anchor="middle">hours, location, info</text>
+          <rect class="box a" x="370" y="246" width="160" height="62" rx="10"/><text class="t" x="450" y="273" text-anchor="middle">Honest fallback</text><text class="s" x="450" y="291" text-anchor="middle">"see the site or call us"</text>
+          <rect class="box g" x="580" y="134" width="150" height="62" rx="10"/><text class="t" x="655" y="161" text-anchor="middle">Reply writer</text><text class="s" x="655" y="179" text-anchor="middle">drafts the text</text>
+          <path class="ln" marker-end="url(#ah2)" d="M130 165 H168"/>
+          <path class="ln" marker-end="url(#ah2)" d="M310 150 C340 150 340 53 368 53"/>
+          <path class="ln" marker-end="url(#ah2)" d="M310 165 H368"/>
+          <path class="ln" marker-end="url(#ah2)" d="M310 180 C340 180 340 277 368 277"/>
+          <path class="ln d" d="M530 53 H578"/>
+          <path class="ln" marker-end="url(#ah2)" d="M500 84 C540 110 560 140 578 152"/>
+          <path class="ln" marker-end="url(#ah2)" d="M530 165 H578"/>
+        </svg>
+      </div>
+      <figcaption>Each agent has a short, focused prompt. Only the inventory agent touches car data, and it reads it from the real inventory instead of remembering it.</figcaption>
+    </figure>
+
+    <p>These were the main specialists. There were others for other kinds of questions, all built the same way.</p>
+    <ul>
+      <li><b>Inventory agent.</b> Works out which car and what detail the shopper wants, looks it up in the inventory database, and passes the facts to the reply writer. Price, mileage and features come from data, never from the model's memory.</li>
+      <li><b>Dealership agent.</b> Answers questions about the dealership itself, like hours and location.</li>
+      <li><b>Reply writer.</b> Turns the facts into a short, friendly text that sounds like the dealership.</li>
+      <li><b>Honest fallback.</b> If no specialist can answer, the shopper gets "We don't have the answer to that one. Check our website or call us at…" instead of a made-up reply. People asked strange things, and this is what kept the weird ones safe.</li>
+    </ul>
+
+    <h2>The trade-off</h2>
+    <p>Routing through several agents made each reply a little slower than one agent answering directly. I took that trade on purpose. Each agent's prompt was small enough to get right and easy to test on its own, and a reply that's a few seconds slower but true beats an instant one that loses a sale.</p>
+
+    <h2>Result</h2>
+    <p>Answers became either accurate, pulled from real inventory and dealership info, or an honest handoff to a person. The made-up promises stopped. There were still some bugs to chase, and we never set up formal accuracy tracking, so I don't have a percentage to quote. The change in what customers were told was obvious, though.</p>
+    <div class="note">What I took from it: an agent that's sure of itself is only useful if it's right. Small agents with one job, real data instead of memory, and a clear "I don't know" path made the system something a business could trust with its customers.</div>
+
+    <h3>My role</h3>
+    <p>I joined the agency after the first version was live. The multi-agent redesign (the director, the specialist split, and the fallback) was my idea, and I built it. I also helped on the agency's other automations, like post-purchase texts triggered from a store's point-of-sale system and automatic review requests after a visit.</p>
+
+    <nav class="next" aria-label="More work">
+      <a href="../../title/index.html"><span>Previous</span>← Title</a>
+      <a href="../jarvis/index.html"><span>Next</span>Jarvis →</a>
+    </nav>
+  </article>
+</main>
+<footer class="wrap narrow">© 2026 Pahul Sachdev</footer>
+</body>
+</html>
